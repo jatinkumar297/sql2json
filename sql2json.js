@@ -2,9 +2,10 @@ import { readFileSync, writeFileSync } from "fs"
 
 const data = {}
 
+const patientIDs = JSON.parse(readFileSync("pateintIDs.new.json", "utf8"))
 const statements = readFileSync("data.sql", "utf8")
-	.split(/;\s*\n/)
-	.filter((stmt) => stmt.trim().startsWith("INSERT INTO"))
+	.split("\n\nINSERT INTO")
+	.filter((stmt) => stmt.trim().startsWith("`"))
 
 function parseRow(row) {
 	const result = []
@@ -85,6 +86,7 @@ for (const stmt of statements) {
 	const rowValues = values.split("\n").map(parseRow)
 
 	for (const row of rowValues) {
+		if (tableName.includes("patient") && patientIDs.includes(row[0])) continue
 		const json = keys.reduce(
 			(r, key, idx) => ({
 				...r,
